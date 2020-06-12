@@ -72,7 +72,8 @@ func (m *ClusterInfo) StartService(handlers handler.EventHandlers) {
 
 func (m *ClusterInfo) handleSchedulerEvents() {
 	for {
-		ev := <-m.pendingSchedulerEvents
+		ev := <-m.clusterReturn().pendingSchedulerEvents
+		//ev.(event).RLock()
 		switch v := ev.(type) {
 		case *cacheevent.AllocationProposalBundleEvent:
 			m.processAllocationProposalEvent(v)
@@ -87,7 +88,14 @@ func (m *ClusterInfo) handleSchedulerEvents() {
 		default:
 			panic(fmt.Sprintf("%s is not an acceptable type for scheduler event.", reflect.TypeOf(v).String()))
 		}
+		//ev.(event).RUnlock()
 	}
+}
+
+func (m *ClusterInfo) clusterReturn() *ClusterInfo {
+	m.RLock()
+	defer m.RUnlock()
+	return m
 }
 
 func (m *ClusterInfo) handleRMEvents() {
