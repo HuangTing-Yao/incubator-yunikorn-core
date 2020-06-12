@@ -19,6 +19,9 @@
 package commonevents
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/apache/incubator-yunikorn-core/pkg/common/resources"
 	"github.com/apache/incubator-yunikorn-scheduler-interface/lib/go/si"
 )
@@ -57,6 +60,8 @@ type AllocationProposal struct {
 	Priority          *si.Priority
 	PartitionName     string
 	UUID              string // Set when the proposal is added in the cache
+
+	sync.RWMutex
 }
 
 // Message from scheduler about release allocation
@@ -83,4 +88,10 @@ func NewReleaseAllocation(uuid, appID, partitionName, message string, releaseTyp
 		Message:       message,
 		ReleaseType:   releaseType,
 	}
+}
+
+func (proposal *AllocationProposal) String() string {
+	proposal.RLock()
+	defer proposal.RUnlock()
+	return fmt.Sprintf("{ApplicationID :%s, QueueName: %s, PartitionName: %s, AllocationKey: %s}", proposal.ApplicationID, proposal.QueueName, proposal.PartitionName, proposal.AllocationKey)
 }

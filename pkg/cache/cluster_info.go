@@ -73,28 +73,17 @@ func (m *ClusterInfo) StartService(handlers handler.EventHandlers) {
 func (m *ClusterInfo) handleSchedulerEvents() {
 	for {
 		ev := <-m.pendingSchedulerEvents
-		//ev.(event).RLock()
 		switch v := ev.(type) {
 		case *cacheevent.AllocationProposalBundleEvent:
-			m.RLock()
 			m.processAllocationProposalEvent(v)
-			m.RUnlock()
 		case *cacheevent.RejectedNewApplicationEvent:
-			m.RLock()
 			m.processRejectedApplicationEvent(v)
-			m.RUnlock()
 		case *cacheevent.ReleaseAllocationsEvent:
-			m.RLock()
 			m.handleAllocationReleasesRequestEvent(v)
-			m.RUnlock()
 		case *cacheevent.RemovedApplicationEvent:
-			m.RLock()
 			m.processRemovedApplication(v)
-			m.RUnlock()
 		case *commonevents.RemoveRMPartitionsEvent:
-			m.RLock()
 			m.processRemoveRMPartitionsEvent(v)
-			m.RUnlock()
 		default:
 			panic(fmt.Sprintf("%s is not an acceptable type for scheduler event.", reflect.TypeOf(v).String()))
 		}
@@ -591,6 +580,13 @@ func (m *ClusterInfo) processAllocationProposalEvent(event *cacheevent.Allocatio
 		RmID:        rmID,
 	})
 }
+
+/*
+func (proposal *AllocationProposal) String() string {
+	proposal.RLock()
+	defer proposal.RUnlock()
+	return fmt.Sprintf{"%s", proposal.ApplicationID}
+} */
 
 // Rejected application from the scheduler.
 // Cleanup the app from the partition.
