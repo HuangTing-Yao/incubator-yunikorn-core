@@ -566,9 +566,9 @@ func (m *ClusterInfo) processAllocationProposalEvent(event *cacheevent.Allocatio
 
 	// all is confirmed set the UUID in the proposal to pass it back to the scheduler
 	// currently used when an ask is removed while allocation is in flight
-	proposal.RLock()
+	proposal.Lock()
 	proposal.UUID = allocInfo.AllocationProto.UUID
-	proposal.RUnlock()
+	proposal.Unlock()
 	// Send accept event back to scheduler
 	// this must be only 1: the handler will ignore all others
 	m.EventHandlers.SchedulerEventHandler.HandleEvent(&schedulerevent.SchedulerAllocationUpdatesEvent{
